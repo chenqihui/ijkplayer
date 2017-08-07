@@ -48,5 +48,19 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>IJK</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>IJK</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>IJK</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>IJK</string>
+	<key>NSContactsUsageDescription</key>
+	<string>IJK</string>
+	<key>NSCameraUsageDescription</key>
+	<string>IJK</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>IJK</string>
 </dict>
 </plist>
