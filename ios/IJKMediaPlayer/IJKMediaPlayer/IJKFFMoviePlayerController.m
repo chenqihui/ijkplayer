@@ -169,6 +169,7 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
     self = [super init];
     if (self) {
+        //初始化
         ijkmp_global_init();
         ijkmp_global_set_inject_callback(ijkff_inject_callback);
 
@@ -1111,6 +1112,7 @@ inline static void fillMetaInternal(NSMutableDictionary *meta, IjkMediaMeta *raw
             break;
         }
         case FFP_MSG_VIDEO_DECODER_OPEN: {
+            //???
             _isVideoToolboxOpen = avmsg->arg1;
             NSLog(@"FFP_MSG_VIDEO_DECODER_OPEN: %@\n", _isVideoToolboxOpen ? @"true" : @"false");
             [[NSNotificationCenter defaultCenter]

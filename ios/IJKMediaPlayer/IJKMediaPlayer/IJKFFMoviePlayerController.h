@@ -69,26 +69,70 @@ typedef enum IJKLogLevel {
     k_IJK_LOG_SILENT  = 8,
 } IJKLogLevel;
 
+/**
+ 实现IJKMediaPlayback协议
+ */
 @interface IJKFFMoviePlayerController : NSObject <IJKMediaPlayback>
 
+/**
+ 初始化
+
+ @param aUrl 播放地址
+ @param options 播放参数
+ @return 播放器Controller
+ */
 - (id)initWithContentURL:(NSURL *)aUrl
              withOptions:(IJKFFOptions *)options;
 
 - (id)initWithContentURLString:(NSString *)aUrlString
                    withOptions:(IJKFFOptions *)options;
 
+/**
+ 播放，第一次播放，调用前可以更新播放地址：ijkmp_prepare_async
+ */
 - (void)prepareToPlay;
+/**
+ 播放：ijkmp_start
+ */
 - (void)play;
+/**
+ 暂停：ijkmp_pause
+ */
 - (void)pause;
+/**
+ 关闭：ijkmp_stop
+ */
 - (void)stop;
+/**
+ 判断当前是否在播放
+
+ @return 播放YES，反之NO
+ */
 - (BOOL)isPlaying;
+//ijkmp_get_property_int64
 - (int64_t)trafficStatistic;
+//ijkmp_get_property_float
 - (float)dropFrameRate;
 
+/**
+ 在后台时暂停播放
+
+ @param pause 
+ */
 - (void)setPauseInBackground:(BOOL)pause;
 - (BOOL)isVideoToolboxOpen;
 
+/**
+ 日志开启
+
+ @param preferLogReport
+ */
 + (void)setLogReport:(BOOL)preferLogReport;
+/**
+ 日志等级
+
+ @param logLevel
+ */
 + (void)setLogLevel:(IJKLogLevel)logLevel;
 + (BOOL)checkIfFFmpegVersionMatch:(BOOL)showAlert;
 + (BOOL)checkIfPlayerVersionMatch:(BOOL)showAlert
@@ -96,6 +140,9 @@ typedef enum IJKLogLevel {
 
 @property(nonatomic, readonly) CGFloat fpsInMeta;
 @property(nonatomic, readonly) CGFloat fpsAtOutput;
+/**
+ 显示参数view
+ */
 @property(nonatomic) BOOL shouldShowHudView;
 
 - (void)setOptionValue:(NSString *)value
@@ -108,6 +155,10 @@ typedef enum IJKLogLevel {
 
 
 
+/**
+ ijkmp_set_option 
+ ijkmp_set_option_int
+ */
 - (void)setFormatOptionValue:       (NSString *)value forKey:(NSString *)key;
 - (void)setCodecOptionValue:        (NSString *)value forKey:(NSString *)key;
 - (void)setSwsOptionValue:          (NSString *)value forKey:(NSString *)key;

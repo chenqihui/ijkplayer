@@ -195,6 +195,7 @@ static int packet_queue_put(PacketQueue *q, AVPacket *pkt)
     ret = packet_queue_put_private(q, pkt);
     SDL_UnlockMutex(q->mutex);
 
+    //将缓存空间的引用计数-1，并将Packet中的其他字段设为初始值。如果引用计数为0，自动的释放缓存空间。所以，有两个Packet共享同一个数据缓存空间的时候可用这么做
     if (pkt != &flush_pkt && ret < 0)
         av_packet_unref(pkt);
 
@@ -1166,6 +1167,7 @@ static void step_to_next_frame_l(FFPlayer *ffp)
 
 static double compute_target_delay(FFPlayer *ffp, double delay, VideoState *is)
 {
+    printf("now-->%f\n", delay);
     double sync_threshold, diff = 0;
 
     /* update delay to follow master synchronisation source */
@@ -1188,6 +1190,7 @@ static double compute_target_delay(FFPlayer *ffp, double delay, VideoState *is)
                 delay = 2 * delay;
         }
     }
+    printf("next-->%f\n", delay);
 
     if (ffp) {
         ffp->stat.avdelay = delay;
@@ -2742,6 +2745,7 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         is->video_st = ic->streams[stream_index];
 
         decoder_init(&is->viddec, avctx, &is->videoq, is->continue_read_thread);
+        //首先会打开ffmpeg的解码器，然后通过ffpipeline_open_video_decoder创建IJKFF_Pipenode
         ffp->node_vdec = ffpipeline_open_video_decoder(ffp->pipeline, ffp);
         if (!ffp->node_vdec)
             goto fail;
@@ -2895,6 +2899,7 @@ static int read_thread(void *arg)
 
     if (ffp->iformat_name)
         is->iformat = av_find_input_format(ffp->iformat_name);
+    //打开文件，主要是探测协议类型，如果是网络文件则创建网络链接等
     err = avformat_open_input(&ic, is->filename, is->iformat, &ffp->format_opts);
     if (err < 0) {
         print_error(is->filename, err);
@@ -3488,6 +3493,7 @@ static int video_refresh_thread(void *arg)
     VideoState *is = ffp->is;
     double remaining_time = 0.0;
     while (!is->abort_request) {
+        printf("waiting->%f\n", remaining_time);
         if (remaining_time > 0.0)
             av_usleep((int)(int64_t)(remaining_time * 1000000.0));
         remaining_time = REFRESH_RATE;
