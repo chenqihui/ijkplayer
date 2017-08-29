@@ -48,7 +48,13 @@
                                                    object: [AVAudioSession sharedInstance]];
         _audioSessionInitialized = YES;
     }
-
+    
+    /**
+     AnakinChen:
+     
+     播放设置AVAudioSessionCategoryPlayback，表示
+     用于以语音为主的应用，使用这个category的应用不会随着静音键和屏幕关闭而静音。可在后台播放声音
+     */
     /* Set audio session to mediaplayback */
     NSError *error = nil;
     if (NO == [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:&error]) {

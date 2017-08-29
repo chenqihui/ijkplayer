@@ -39,6 +39,15 @@
 #define kIJKDeviceRank_LatestUnknown                    90
 #define kIJKDeviceRank_Simulator                        100
 
+/**
+ AnakinChen:
+ 
+ iOS设备的信息
+ 
+ platform（iOS系统的机型标记），
+ name（对应市面的iOS设备的机型名称），
+ rank（设备使用的芯片类型）
+ */
 @interface IJKDeviceModel : NSObject
 
 @property(nonatomic) NSString   *platform;

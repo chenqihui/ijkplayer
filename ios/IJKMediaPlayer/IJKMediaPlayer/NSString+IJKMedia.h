@@ -22,7 +22,13 @@
  */
 
 #import <Foundation/Foundation.h>
-
+/**
+ AnakinChen:
+ 
+ IJKPlayer使用的String类别
+ 1、nil判断，如果是nil会返回空字符串@""
+ 2、ipv4的判断
+ */
 @interface NSString (IJKMedia)
 
 + (NSString *) ijk_stringBeEmptyIfNil:(NSString *)src;

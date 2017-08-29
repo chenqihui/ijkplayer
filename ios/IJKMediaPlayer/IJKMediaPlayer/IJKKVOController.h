@@ -22,7 +22,11 @@
  */
 
 #import <Foundation/Foundation.h>
-
+/**
+ AnakinChen:
+ 
+ KVO操作的封装，KVO的使用addObserver，在回收的时候，即dealloc或者其他方法里面，调用removeObserver对应的key。注意add和remove必须对应，少一个都可能引起崩溃。而这里赋值在weak的成员变量target，使用对象来维护全部添加的key和Observer。然后统一管理。
+ */
 @interface IJKKVOController : NSObject
 
 - (id)initWithTarget:(NSObject *)target;

@@ -23,14 +23,22 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-
+/**
+ AnakinChen:
+ 
+ 显示填充模式
+ */
 typedef NS_ENUM(NSInteger, IJKMPMovieScalingMode) {
     IJKMPMovieScalingModeNone,       // No scaling
     IJKMPMovieScalingModeAspectFit,  // Uniform scale until one dimension fits
     IJKMPMovieScalingModeAspectFill, // Uniform scale until the movie fills the visible bounds. One dimension may have clipped contents
     IJKMPMovieScalingModeFill        // Non-uniform scale. Both render dimensions will exactly match the visible bounds
 };
-
+/**
+ AnakinChen:
+ 
+ 视频播放状态
+ */
 typedef NS_ENUM(NSInteger, IJKMPMoviePlaybackState) {
     IJKMPMoviePlaybackStateStopped,
     IJKMPMoviePlaybackStatePlaying,
@@ -39,14 +47,22 @@ typedef NS_ENUM(NSInteger, IJKMPMoviePlaybackState) {
     IJKMPMoviePlaybackStateSeekingForward,
     IJKMPMoviePlaybackStateSeekingBackward
 };
-
+/**
+ AnakinChen:
+ 
+ 视频加载状态
+ */
 typedef NS_OPTIONS(NSUInteger, IJKMPMovieLoadState) {
     IJKMPMovieLoadStateUnknown        = 0,
     IJKMPMovieLoadStatePlayable       = 1 << 0,
     IJKMPMovieLoadStatePlaythroughOK  = 1 << 1, // Playback will be automatically started in this state when shouldAutoplay is YES
     IJKMPMovieLoadStateStalled        = 1 << 2, // Playback will be automatically paused in this state, if started
 };
-
+/**
+ AnakinChen:
+ 
+ 播放结束，即停止时的情况
+ */
 typedef NS_ENUM(NSInteger, IJKMPMovieFinishReason) {
     IJKMPMovieFinishReasonPlaybackEnded,
     IJKMPMovieFinishReasonPlaybackError,
@@ -60,7 +76,13 @@ typedef NS_ENUM(NSInteger, IJKMPMovieTimeOption) {
     IJKMPMovieTimeOptionNearestKeyFrame,
     IJKMPMovieTimeOptionExact
 };
-
+/**
+ AnakinChen:
+ 
+ 播放器使用的协议，
+ 目前有AVPlayer、MPMovieController和ffmpeg。
+ 如果后续扩展其他播放器，可以通过封装实现IJKMediaPlayback。
+ */
 @protocol IJKMediaPlayback;
 
 #pragma mark IJKMediaPlayback
@@ -100,6 +122,15 @@ typedef NS_ENUM(NSInteger, IJKMPMovieTimeOption) {
 
 - (UIImage *)thumbnailImageAtCurrentTime;
 
+/**
+ AnakinChen:
+ 
+ 各种通知的名称
+ 
+ 总结
+ 是控件，即UI类的模块，使用delegate
+ 是逻辑功能，就可以使用Notifications或者delegate都可以。不过一般功能独立的第三方SDK确实采用Nofitication会在内部和外部解耦比较强。但是Nofitication相对阅读性就没delegate那么高，不过确实第三方的对外使用Notification，对内使用delegate。
+ */
 #pragma mark Notifications
 
 #ifdef __cplusplus
@@ -202,13 +233,21 @@ typedef NS_ENUM(NSInteger, IJKMediaEvent) {
 @property(nonatomic, getter=isUrlChanged) BOOL urlChanged;  // auto set to YES by url changed
 
 @end
-
+/**
+ AnakinChen:
+ 
+ 检验地址是否可打开，这个用法比较特别，或者说是针对Objective-C在语法上方法的返回只能是一个对象。我们有使用集合的，struct结构体（相对较少），对象的返回出来。而这里特别的是，它将入参和出参都放在同个IJKMediaUrlOpenData对象里面。这样设计的接口比较简洁，可读性较差。需要了解IJKMediaUrlOpenData的属性。
+ */
 @protocol IJKMediaUrlOpenDelegate <NSObject>
 
 - (void)willOpenUrl:(IJKMediaUrlOpenData*) urlOpenData;
 
 @end
-
+/**
+ AnakinChen:
+ 
+ 保存ffmpeg的AVAppHttpEvent状态过程的数据（TODO:后续测测）
+ */
 @protocol IJKMediaNativeInvokeDelegate <NSObject>
 
 - (int)invoke:(IJKMediaEvent)event attributes:(NSDictionary *)attributes;

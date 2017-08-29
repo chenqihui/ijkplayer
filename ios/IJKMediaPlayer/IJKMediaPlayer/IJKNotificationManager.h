@@ -22,7 +22,12 @@
  */
 
 #import <Foundation/Foundation.h>
-
+/**
+ AnakinChen:
+ 
+ NSNotification的封装和统一维护
+ 通知需要add和remove对应，当如果没有remove，它不会想KVO一样崩溃。如果对象没有销毁，添加多次同个，是会造成接收多次通知。
+ */
 @interface IJKNotificationManager : NSObject
 
 - (nullable instancetype)init;

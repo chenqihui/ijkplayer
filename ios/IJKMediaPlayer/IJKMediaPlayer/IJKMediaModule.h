@@ -22,7 +22,11 @@
  */
 
 #import <Foundation/Foundation.h>
-
+/**
+ AnakinChen:
+ 
+ APP和Media的空闲状态，并控制屏幕亮屏和息屏
+ */
 @interface IJKMediaModule : NSObject
 
 + (IJKMediaModule *)sharedModule;

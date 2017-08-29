@@ -22,7 +22,11 @@
  */
 
 #import <Foundation/Foundation.h>
-
+/**
+ AnakinChen:
+ 
+ NSError的统一封装
+ */
 @interface IJKMediaUtils : NSObject
 
 + (NSError*)createErrorWithDomain: (NSString*)domain

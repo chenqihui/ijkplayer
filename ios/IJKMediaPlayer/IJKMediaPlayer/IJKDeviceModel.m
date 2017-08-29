@@ -56,6 +56,15 @@ inline static void IJKDeviceRegister(NSMutableDictionary *dict,
     static IJKDeviceModel  *sLatestModel = nil;
     static NSDictionary    *sModelDictionary = nil;
     static dispatch_once_t  sOnceToken = 0;
+    /**
+     AnakinChen:
+     
+     创建已有的机型数据的Model，然后保存到字典里面
+     
+     Optimize:
+     保存的字典对象sModelDictionary，使用static会在较长时间一直有这个对象，即占有着内存。
+     其实可以不保存sModelDictionary，因为当获取sLatestModel，即匹配到当前设备的信息后，只要这个信息不被回收，就会一直使用，而不会通过sModelDictionary获取，所以sModelDictionary没有必要static。
+     */
     dispatch_once(&sOnceToken, ^{
         NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
 
@@ -152,7 +161,12 @@ inline static void IJKDeviceRegister(NSMutableDictionary *dict,
                                                        withName:name
                                                        withRank:kIJKDeviceRank_LatestUnknown];
     });
-
+    
+    /**
+     AnakinChen:
+     
+     通过platform获取配置好的信息，这里如果完全匹配获取为nil，则截断platform，因为系统的platform是可能带区域的，如港行，日版等等。
+     */
     IJKDeviceModel *model = [sModelDictionary objectForKey:name];
     if (model == nil) {
         if (model == nil) {
