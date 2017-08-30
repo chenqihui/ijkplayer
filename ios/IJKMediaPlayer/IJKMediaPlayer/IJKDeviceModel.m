@@ -61,7 +61,7 @@ inline static void IJKDeviceRegister(NSMutableDictionary *dict,
      
      创建已有的机型数据的Model，然后保存到字典里面
      
-     Optimize:
+     [TODO]
      保存的字典对象sModelDictionary，使用static会在较长时间一直有这个对象，即占有着内存。
      其实可以不保存sModelDictionary，因为当获取sLatestModel，即匹配到当前设备的信息后，只要这个信息不被回收，就会一直使用，而不会通过sModelDictionary获取，所以sModelDictionary没有必要static。
      */

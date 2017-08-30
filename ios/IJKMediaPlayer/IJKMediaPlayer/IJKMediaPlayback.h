@@ -88,13 +88,53 @@ typedef NS_ENUM(NSInteger, IJKMPMovieTimeOption) {
 #pragma mark IJKMediaPlayback
 
 @protocol IJKMediaPlayback <NSObject>
-
+/**
+ AnakinChen:
+ 
+ 准备成功后就播放
+ */
 - (void)prepareToPlay;
+/**
+ AnakinChen:
+ 
+ 播放
+ */
 - (void)play;
+/**
+ AnakinChen:
+ 
+ 暂停
+ */
 - (void)pause;
+/**
+ AnakinChen:
+ 
+ AVPlayer是暂停
+ MPMovie无
+ FFmpeg是关闭
+ */
 - (void)stop;
+/**
+ AnakinChen:
+ 
+ 当前播放器的播放状态
+ */
 - (BOOL)isPlaying;
+/**
+ AnakinChen:
+ 
+ AVPlayer是关闭
+ MPMovie无
+ FFmpeg是彻底关闭
+ */
 - (void)shutdown;
+/**
+ AnakinChen:
+ 
+ 是否压后台暂停播放pause
+ [TODO]
+ 了解FFmpeg在压后台时不暂停，绘制画面和播放声音的控制。
+ */
 - (void)setPauseInBackground:(BOOL)pause;
 
 @property(nonatomic, readonly)  UIView *view;
@@ -103,16 +143,32 @@ typedef NS_ENUM(NSInteger, IJKMPMovieTimeOption) {
 @property(nonatomic, readonly)  NSTimeInterval playableDuration;
 @property(nonatomic, readonly)  NSInteger bufferingProgress;
 
+/**
+ AnakinChen:
+ 
+ 准备完毕，可以播放状态
+ */
 @property(nonatomic, readonly)  BOOL isPreparedToPlay;
 @property(nonatomic, readonly)  IJKMPMoviePlaybackState playbackState;
 @property(nonatomic, readonly)  IJKMPMovieLoadState loadState;
 
+/**
+ AnakinChen:
+ 
+ 累积传输的字节数，MP有
+ */
 @property(nonatomic, readonly) int64_t numberOfBytesTransferred;
 
 @property(nonatomic, readonly) CGSize naturalSize;
 @property(nonatomic) IJKMPMovieScalingMode scalingMode;
 @property(nonatomic) BOOL shouldAutoplay;
 
+/**
+ AnakinChen:
+ 
+ 链接AirPlay的使用情况
+ [TODO]
+ */
 @property (nonatomic) BOOL allowsMediaAirPlay;
 @property (nonatomic) BOOL isDanmakuMediaAirPlay;
 @property (nonatomic, readonly) BOOL airPlayMediaActive;
@@ -246,7 +302,8 @@ typedef NS_ENUM(NSInteger, IJKMediaEvent) {
 /**
  AnakinChen:
  
- 保存ffmpeg的AVAppHttpEvent状态过程的数据（TODO:后续测测）
+ 保存ffmpeg的AVAppHttpEvent状态过程的数据
+ [TODO]后续测测
  */
 @protocol IJKMediaNativeInvokeDelegate <NSObject>
 
