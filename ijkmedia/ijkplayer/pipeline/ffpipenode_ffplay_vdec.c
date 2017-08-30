@@ -38,6 +38,11 @@ static int func_run_sync(IJKFF_Pipenode *node)
 {
     IJKFF_Pipenode_Opaque *opaque = node->opaque;
 
+    /**
+     AnakinChen:3.2.7
+     
+     软解的线程
+     */
     return ffp_video_thread(opaque->ffp);
 }
 

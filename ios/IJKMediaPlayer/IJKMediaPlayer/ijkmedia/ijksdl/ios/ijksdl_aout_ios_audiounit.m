@@ -126,6 +126,11 @@ static void aout_free_l(SDL_Aout *aout)
     SDL_Aout_FreeInternal(aout);
 }
 
+/**
+ AnakinChen:4.1.4
+ 
+ 主要完成的是创建SDL_Aout对象
+ */
 SDL_Aout *SDL_AoutIos_CreateForAudioUnit()
 {
     SDL_Aout *aout = SDL_Aout_CreateInternal(sizeof(SDL_Aout_Opaque));

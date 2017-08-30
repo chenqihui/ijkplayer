@@ -114,6 +114,11 @@ void ijkmp_change_state_l(IjkMediaPlayer *mp, int new_state)
     ffp_notify_msg1(mp->ffplayer, FFP_MSG_PLAYBACK_STATE_CHANGED);
 }
 
+/**
+ AnakinChen:1.3.1
+ 
+ 创建IjkMediaPlayer *mp和对应的ffplayer
+ */
 IjkMediaPlayer *ijkmp_create(int (*msg_loop)(void*))
 {
     IjkMediaPlayer *mp = (IjkMediaPlayer *) mallocz(sizeof(IjkMediaPlayer));
@@ -415,10 +420,14 @@ static int ijkmp_prepare_async_l(IjkMediaPlayer *mp)
 
     // released in msg_loop
     ijkmp_inc_ref(mp);
+    /**
+     AnakinChen:2.1.3
+     
+     创建消息线程，并启动初始化播放器IjkMediaPlayer时的消息回调函数msg_loop
+     */
     mp->msg_thread = SDL_CreateThreadEx(&mp->_msg_thread, ijkmp_msg_loop, mp, "ff_msg_loop");
     // msg_thread is detached inside msg_loop
     // TODO: 9 release weak_thiz if pthread_create() failed;
-
     int retval = ffp_prepare_async_l(mp->ffplayer, mp->data_source);
     if (retval < 0) {
         ijkmp_change_state_l(mp, MP_STATE_ERROR);
@@ -432,6 +441,12 @@ int ijkmp_prepare_async(IjkMediaPlayer *mp)
 {
     assert(mp);
     MPTRACE("ijkmp_prepare_async()\n");
+    /**
+     AnakinChen:
+     
+     [TODO]：加锁逻辑？
+
+     */
     pthread_mutex_lock(&mp->mutex);
     int retval = ijkmp_prepare_async_l(mp);
     pthread_mutex_unlock(&mp->mutex);

@@ -107,6 +107,11 @@ static int vout_display_overlay(SDL_Vout *vout, SDL_VoutOverlay *overlay)
     }
 }
 
+/**
+ AnakinChen:1.3.2
+ 
+ 图像渲染对象SDL_Vout
+ */
 SDL_Vout *SDL_VoutIos_CreateForGLES2()
 {
     SDL_Vout *vout = SDL_Vout_CreateInternal(sizeof(SDL_Vout_Opaque));

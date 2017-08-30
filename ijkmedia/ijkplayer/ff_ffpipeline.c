@@ -63,6 +63,11 @@ void ffpipeline_free_p(IJKFF_Pipeline **pipeline)
     ffpipeline_free(*pipeline);
 }
 
+/**
+ AnakinChen:3.1.2
+ 
+ func_open_video_decoder函数指针最后指向的是ffpipeline_ios.c中的func_open_video_decoder，其定
+ */
 IJKFF_Pipenode* ffpipeline_open_video_decoder(IJKFF_Pipeline *pipeline, FFPlayer *ffp)
 {
     return pipeline->func_open_video_decoder(pipeline, ffp);

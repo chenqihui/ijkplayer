@@ -512,6 +512,11 @@ fail0:
     return ret;
 }
 
+/**
+ AnakinChen:3.2.9
+ 
+ 从解码前的video queue中取出一帧数据，送入decoder进行解码，解码后的数据在ffplay_video_thread中送入pictq。
+ */
 static int decoder_decode_frame(FFPlayer *ffp, Decoder *d, AVFrame *frame, AVSubtitle *sub) {
     int got_frame = 0;
 
@@ -812,6 +817,12 @@ static size_t parse_ass_subtitle(const char *ass, char *output)
     return 0;
 }
 
+/**
+ AnakinChen:5.1.3
+ 
+ 调用frame_queue_peek_last从pictq中读取当前需要显示视频帧
+ 调用SDL_VoutDisplayYUVOverlay进行绘制
+ */
 static void video_image_display2(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
@@ -1332,6 +1343,11 @@ retry:
         }
 display:
         /* display picture */
+        /**
+         AnakinChen:5.1.2
+         
+         渲染图像video_display2
+         */
         if (!ffp->display_disable && is->force_refresh && is->show_mode == SHOW_MODE_VIDEO && is->pictq.rindex_shown)
             video_display2(ffp);
     }
@@ -2047,6 +2063,11 @@ static int ffplay_video_thread(void *arg)
     }
 
     for (;;) {
+        /**
+         AnakinChen:3.2.8
+         
+         get_video_frame中调用了decoder_decode_frame
+         */
         ret = get_video_frame(ffp, frame);
         if (ret < 0)
             goto the_end;
@@ -2158,6 +2179,11 @@ static int video_thread(void *arg)
     FFPlayer *ffp = (FFPlayer *)arg;
     int       ret = 0;
 
+    /**
+     AnakinChen:3.2.5
+     
+     ffpipenode_run_sync中调用的是IJKFF_Pipenode对象中的func_run_sync
+     */
     if (ffp->node_vdec) {
         ret = ffpipenode_run_sync(ffp->node_vdec);
     }
@@ -2518,6 +2544,11 @@ static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
     }
 }
 
+/**
+ AnakinChen:4.1.7
+ 
+ 配置了音频输出的相关参数SDL_AudioSpec
+ */
 static int audio_open(FFPlayer *opaque, int64_t wanted_channel_layout, int wanted_nb_channels, int wanted_sample_rate, struct AudioParams *audio_hw_params)
 {
     FFPlayer *ffp = opaque;
@@ -2554,6 +2585,13 @@ static int audio_open(FFPlayer *opaque, int64_t wanted_channel_layout, int wante
     wanted_spec.samples = FFMAX(SDL_AUDIO_MIN_BUFFER_SIZE, 2 << av_log2(wanted_spec.freq / SDL_AoutGetAudioPerSecondCallBacks(ffp->aout)));
     wanted_spec.callback = sdl_audio_callback;
     wanted_spec.userdata = opaque;
+    /**
+     AnakinChen:4.1.8
+     
+     AudioQueue模块在工作过程中，通过不断的callback来获取pcm数据进行播放
+     [TODO]
+     待了解
+     */
     while (SDL_AoutOpenAudio(ffp->aout, &wanted_spec, &spec) < 0) {
         /* avoid infinity loop on exit. --by bbcallen */
         if (is->abort_request)
@@ -2601,6 +2639,16 @@ static int audio_open(FFPlayer *opaque, int64_t wanted_channel_layout, int wante
     return spec.size;
 }
 
+/**
+ AnakinChen:3.1
+ 
+ 视频解码方式选择，并打开解码器
+ */
+/**
+ AnakinChen:4.1.5
+ 
+ 调用audio_open打开了audio output设备
+ */
 /* open a given stream. Return 0 if OK */
 static int stream_component_open(FFPlayer *ffp, int stream_index)
 {
@@ -2711,7 +2759,11 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         nb_channels    = avctx->channels;
         channel_layout = avctx->channel_layout;
 #endif
-
+            
+        /**
+         AnakinChen:4.1.6
+         
+         */
         /* prepare audio output */
         if ((ret = audio_open(ffp, channel_layout, nb_channels, sample_rate, &is->audio_tgt)) < 0)
             goto fail;
@@ -2745,10 +2797,19 @@ static int stream_component_open(FFPlayer *ffp, int stream_index)
         is->video_st = ic->streams[stream_index];
 
         decoder_init(&is->viddec, avctx, &is->videoq, is->continue_read_thread);
-        //首先会打开ffmpeg的解码器，然后通过ffpipeline_open_video_decoder创建IJKFF_Pipenode
+        /**
+         AnakinChen:3.1.1
+         
+         首先会打开ffmpeg的解码器，然后通过ffpipeline_open_video_decoder创建IJKFF_Pipenode
+         */
         ffp->node_vdec = ffpipeline_open_video_decoder(ffp->pipeline, ffp);
         if (!ffp->node_vdec)
             goto fail;
+        /**
+         AnakinChen:3.1.3
+         
+         解码线程video_thread
+         */
         if ((ret = decoder_start(&is->viddec, video_thread, ffp, "ff_video_dec")) < 0)
             goto out;
         is->queue_attachments_req = 1;
@@ -2872,13 +2933,23 @@ static int read_thread(void *arg)
     is->last_audio_stream = is->audio_stream = -1;
     is->last_subtitle_stream = is->subtitle_stream = -1;
     is->eof = 0;
-
+    
+    /**
+     AnakinChen:2.1.10
+     
+     创建上下文结构体ic，这个结构体是最上层的结构体，表示输入上下文
+     */
     ic = avformat_alloc_context();
     if (!ic) {
         av_log(NULL, AV_LOG_FATAL, "Could not allocate context.\n");
         ret = AVERROR(ENOMEM);
         goto fail;
     }
+    /**
+     AnakinChen:2.1.11
+     
+     设置中断函数，如果出错或者退出，就可以立刻退出
+     */
     ic->interrupt_callback.callback = decode_interrupt_cb;
     ic->interrupt_callback.opaque = is;
     if (!av_dict_get(ffp->format_opts, "scan_all_pmts", NULL, AV_DICT_MATCH_CASE)) {
@@ -2899,7 +2970,17 @@ static int read_thread(void *arg)
 
     if (ffp->iformat_name)
         is->iformat = av_find_input_format(ffp->iformat_name);
-    //打开文件，主要是探测协议类型，如果是网络文件则创建网络链接等
+    /**
+     AnakinChen:2.1.12
+     
+     打开文件，主要是探测协议类型，如果是网络文件则创建网络链接等
+     */
+    /**
+     AnakinChen:
+     
+     [TODO]
+     CDN-->网络接收
+     */
     err = avformat_open_input(&ic, is->filename, is->iformat, &ffp->format_opts);
     if (err < 0) {
         print_error(is->filename, err);
@@ -2926,6 +3007,11 @@ static int read_thread(void *arg)
     opts = setup_find_stream_info_opts(ic, ffp->codec_opts);
     orig_nb_streams = ic->nb_streams;
 
+    /**
+     AnakinChen:2.1.13
+     
+     探测媒体类型，可得到当前文件的封装格式，音视频编码参数等信息
+     */
     err = avformat_find_stream_info(ic, opts);
 
     for (i = 0; i < orig_nb_streams; i++)
@@ -3031,6 +3117,17 @@ static int read_thread(void *arg)
     }
 #endif
 
+    /**
+     AnakinChen:2.1.14
+     
+     打开视频、音频解码器。在此会打开相应解码器，并创建相应的解码线程。
+     */
+    /**
+     AnakinChen:
+     
+     [TODO]
+     解码
+     */
     /* open the streams */
     if (st_index[AVMEDIA_TYPE_AUDIO] >= 0) {
         stream_component_open(ffp, st_index[AVMEDIA_TYPE_AUDIO]);
@@ -3260,6 +3357,11 @@ static int read_thread(void *arg)
             }
         }
         pkt->flags = 0;
+        /**
+         AnakinChen:2.1.15
+         
+         读取媒体数据，得到的是音视频分离的解码前数据
+         */
         ret = av_read_frame(ic, pkt);
         if (ret < 0) {
             int pb_eof = 0;
@@ -3338,6 +3440,14 @@ static int read_thread(void *arg)
                 av_q2d(ic->streams[pkt->stream_index]->time_base) -
                 (double)(ffp->start_time != AV_NOPTS_VALUE ? ffp->start_time : 0) / 1000000
                 <= ((double)ffp->duration / 1000000);
+        /**
+         AnakinChen:2.1.16
+         
+         将音视频数据分别送入相应的queue中
+         
+         重复15、16，即可不断获取待播放的数据。
+         解码前的数据类型和解码后的数据类型均在VideoState结构体中包含
+         */
         if (pkt->stream_index == is->audio_stream && pkt_in_play_range) {
             packet_queue_put(&is->audioq, pkt);
         } else if (pkt->stream_index == is->video_stream && pkt_in_play_range
@@ -3402,13 +3512,23 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
 #endif
 
     /* start video display */
+    /**
+     AnakinChen:2.1.6
+     
+     创建存放video/subtitle/audio解码前数据的videoq/subtitleq/audioq
+     */
     if (frame_queue_init(&is->pictq, &is->videoq, ffp->pictq_size, 1) < 0)
         goto fail;
     if (frame_queue_init(&is->subpq, &is->subtitleq, SUBPICTURE_QUEUE_SIZE, 0) < 0)
         goto fail;
     if (frame_queue_init(&is->sampq, &is->audioq, SAMPLE_QUEUE_SIZE, 1) < 0)
         goto fail;
-
+    
+    /**
+     AnakinChen:2.1.7
+     
+     创建存放video/subtitle/audio解码后数据的pictq/subtitleq/sampq
+     */
     if (packet_queue_init(&is->videoq) < 0 ||
         packet_queue_init(&is->audioq) < 0 ||
         packet_queue_init(&is->subtitleq) < 0)
@@ -3448,12 +3568,26 @@ static VideoState *stream_open(FFPlayer *ffp, const char *filename, AVInputForma
     ffp->is = is;
     is->pause_req = !ffp->start_on_prepared;
 
+    /**
+     AnakinChen:2.1.8
+     
+     创建视频渲染线程video_refresh_thread
+     */
+    /**
+     AnakinChen:5.1.1
+     
+     */
     is->video_refresh_tid = SDL_CreateThreadEx(&is->_video_refresh_tid, video_refresh_thread, ffp, "ff_vout");
     if (!is->video_refresh_tid) {
         av_freep(&ffp->is);
         return NULL;
     }
-
+    
+    /**
+     AnakinChen:2.1.9
+     
+     创建读数据线程read_thread
+     */
     is->read_tid = SDL_CreateThreadEx(&is->_read_tid, read_thread, ffp, "ff_read");
     if (!is->read_tid) {
         av_log(NULL, AV_LOG_FATAL, "SDL_CreateThread(): %s\n", SDL_GetError());
@@ -4025,6 +4159,14 @@ int ffp_prepare_async_l(FFPlayer *ffp, const char *file_name)
 
     av_opt_set_dict(ffp, &ffp->player_opts);
     if (!ffp->aout) {
+        /**
+         AnakinChen:2.1.4
+         AnakinChen:4.1.1
+         
+         打开audio output
+         
+         ffpipeline_open_audio_output方法实际上调用的是IJKFF_Pipeline对象的函数指针func_open_audio_utput，该函数指针在初始化中的ijkmp_ios_create方法中被赋值，最后指向的是func_open_audio_output
+         */
         ffp->aout = ffpipeline_open_audio_output(ffp->pipeline, ffp);
         if (!ffp->aout)
             return -1;
@@ -4036,7 +4178,11 @@ int ffp_prepare_async_l(FFPlayer *ffp, const char *file_name)
         ffp->vfilters_list[ffp->nb_vfilters - 1] = ffp->vfilter0;
     }
 #endif
-
+    /**
+     AnakinChen:2.1.5
+     
+     启动播放器的入口函数
+     */
     VideoState *is = stream_open(ffp, file_name, NULL);
     if (!is) {
         av_log(NULL, AV_LOG_WARNING, "ffp_prepare_async_l: stream_open failed OOM");

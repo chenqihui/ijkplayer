@@ -562,6 +562,11 @@ static VTDecompressionSessionRef vtbsession_create(Ijk_VideoToolBox_Opaque* cont
                           kCVPixelBufferHeightKey, height);
     CFDictionarySetBoolean(destinationPixelBufferAttributes,
                           kCVPixelBufferOpenGLESCompatibilityKey, YES);
+    /**
+     AnakinChen:
+     
+     此处会指定解码后的数据回调函数
+     */
     outputCallback.decompressionOutputCallback = VTDecoderCallback;
     outputCallback.decompressionOutputRefCon = context  ;
     status = VTDecompressionSessionCreate(
@@ -1166,6 +1171,13 @@ Ijk_VideoToolBox_Opaque* videotoolbox_async_create(FFPlayer* ffp, AVCodecContext
     assert(context_vtb->fmt_desc.fmt_desc);
     vtbformat_destroy(&context_vtb->fmt_desc);
 
+    /**
+     AnakinChen:3.2.4
+     
+     vtbsession_create
+     硬件解码器创建函数
+     解码后的数据回调函数地址
+     */
     context_vtb->vt_session = vtbsession_create(context_vtb);
     if (context_vtb->vt_session == NULL)
         goto fail;

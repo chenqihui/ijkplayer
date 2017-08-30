@@ -39,11 +39,28 @@ static IJKFF_Pipenode *func_open_video_decoder(IJKFF_Pipeline *pipeline, FFPlaye
 {
     IJKFF_Pipenode* node = NULL;
     IJKFF_Pipeline_Opaque *opaque = pipeline->opaque;
+    /**
+     AnakinChen:
+     
+     如果配置了ffp->videotoolbox，会优先去尝试打开硬件解码器，
+     
+     不管视频解码还是音频解码，其基本流程都是从解码前的数据缓冲区中取出一帧数据进行解码，完成后放入相应的解码后的数据缓冲区，如下图所示：
+     
+     接收数据 —————>  解码前的数据 -> 解码器 -> 解码后的数据 —————> 渲染(播放)
+     */
     if (ffp->videotoolbox) {
         node = ffpipenode_create_video_decoder_from_ios_videotoolbox(ffp);
         if (!node)
             ALOGE("vtb fail!!! switch to ffmpeg decode!!!! \n");
     }
+    /**
+     AnakinChen:
+     
+     如果硬件解码器打开失败，则会自动切换至软解
+     
+     ffp->videotoolbox需要在起播前通过如下方法配置：
+     ijkmp_set_option_int(_mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER,     "videotoolbox", 1);
+     */
     if (node == NULL) {
         node = ffpipenode_create_video_decoder_from_ffplay(ffp);
         ffp->stat.vdec_type = FFP_PROPV_DECODER_AVCODEC;
@@ -56,6 +73,10 @@ static IJKFF_Pipenode *func_open_video_decoder(IJKFF_Pipeline *pipeline, FFPlaye
     return node;
 }
 
+/**
+ AnakinChen:4.1.3
+ 
+ */
 static SDL_Aout *func_open_audio_output(IJKFF_Pipeline *pipeline, FFPlayer *ffp)
 {
     return SDL_AoutIos_CreateForAudioUnit();
@@ -65,6 +86,11 @@ static SDL_Class g_pipeline_class = {
     .name = "ffpipeline_ios",
 };
 
+/**
+ AnakinChen:1.3.3
+ 
+ 创建平台相关的IJKFF_Pipeline对象，包括视频解码以及音频输出部分
+ */
 IJKFF_Pipeline *ffpipeline_create_from_ios(FFPlayer *ffp)
 {
     IJKFF_Pipeline *pipeline = ffpipeline_alloc(&g_pipeline_class, sizeof(IJKFF_Pipeline_Opaque));
@@ -75,6 +101,10 @@ IJKFF_Pipeline *ffpipeline_create_from_ios(FFPlayer *ffp)
     opaque->ffp                       = ffp;
     pipeline->func_destroy            = func_destroy;
     pipeline->func_open_video_decoder = func_open_video_decoder;
+    /**
+     AnakinChen:4.1.2
+     
+     */
     pipeline->func_open_audio_output  = func_open_audio_output;
 
     return pipeline;

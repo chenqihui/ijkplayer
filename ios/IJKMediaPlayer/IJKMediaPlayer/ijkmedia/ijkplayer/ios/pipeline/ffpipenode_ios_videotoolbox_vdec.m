@@ -78,6 +78,13 @@ static void func_destroy(IJKFF_Pipenode *node)
 static int func_run_sync(IJKFF_Pipenode *node)
 {
     IJKFF_Pipenode_Opaque *opaque = node->opaque;
+    /**
+     AnakinChen:3.2.6
+     
+     视频解码
+     func_run_sync取决于播放前配置的软硬解，假设为软解，则调用
+     这是在初始化创建时候1.3.3设置
+     */
     int ret = videotoolbox_video_thread(opaque);
 
     if (opaque->context) {
@@ -90,7 +97,11 @@ static int func_run_sync(IJKFF_Pipenode *node)
 }
 
 
-
+/**
+ AnakinChen:3.2.1
+ 
+ 硬解解码
+ */
 IJKFF_Pipenode *ffpipenode_create_video_decoder_from_ios_videotoolbox(FFPlayer *ffp)
 {
     if (!ffp || !ffp->is)
@@ -106,10 +117,27 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_ios_videotoolbox(FFPlayer *
     VideoState            *is         = ffp->is;
     IJKFF_Pipenode_Opaque *opaque     = node->opaque;
     node->func_destroy  = func_destroy;
+    /**
+     AnakinChen:3.2.2
+     
+     //其中无论是创建软解码还是硬解码都会指定
+     node->func_run_sync = func_run_sync;//这个函数
+     当为软解码时IJKFF_Pipenode node->func_run_sync 指向的是ffpipenode_ffplay_vdec.c里面的func_run_sync函数
+     当为硬解码时IJKFF_Pipenode node->func_run_sync 指向的是ffpipenode_ios_videotoolbox_vdec.m里面的func_run_sync函数
+     */
     node->func_run_sync = func_run_sync;
     opaque->ffp         = ffp;
     opaque->decoder     = &is->viddec;
     opaque->avctx = opaque->decoder->avctx;
+    /**
+     AnakinChen:3.2.3
+     
+     "AVPacket"是一个结构体,里面装的是h.264
+     "AVFream"里面装的是yuv数据
+     AVPacket —> Decode —> AVFream
+     
+     创建异步解码器 或者 创建同步解码器
+     */
     switch (opaque->avctx->codec_id) {
     case AV_CODEC_ID_H264:
             if (ffp->vtb_async)

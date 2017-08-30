@@ -51,6 +51,14 @@ void SDL_VoutFreeP(SDL_Vout **pvout)
     *pvout = NULL;
 }
 
+/**
+ AnakinChen:5.1.4
+ 
+ display_overlay函数指针在前面初始化流程有介绍过，它在
+ 
+ SDL_Vout *SDL_VoutIos_CreateForGLES2() -> 5.1
+ 方法中被赋值为vout_display_overlay，该方法就是调用OpengGL绘制图像。
+ */
 int SDL_VoutDisplayYUVOverlay(SDL_Vout *vout, SDL_VoutOverlay *overlay)
 {
     if (vout && overlay && vout->display_overlay)

@@ -33,6 +33,15 @@
 #include "ijkplayer/pipeline/ffpipeline_ffplay.h"
 #include "pipeline/ffpipeline_ios.h"
 
+/**
+ AnakinChen:1.3
+ AnakinChen:4.1
+ AnakinChen:5.1
+ 
+ IjkMediaPlayer结构体
+ [TODO]：参考md
+
+ */
 IjkMediaPlayer *ijkmp_ios_create(int (*msg_loop)(void*))
 {
     IjkMediaPlayer *mp = ijkmp_create(msg_loop);

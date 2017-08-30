@@ -169,7 +169,11 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
     self = [super init];
     if (self) {
-        //初始化
+        /**
+         AnakinChen:1.1
+         
+         初始化全局配置
+         */
         ijkmp_global_init();
         ijkmp_global_set_inject_callback(ijkff_inject_callback);
 
@@ -191,6 +195,12 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         // init media resource
         _urlString = aUrlString;
 
+        /**
+         AnakinChen:1.2
+         
+         初始化播放器_mediaPlayer
+         和设置消息处理函数media_player_msg_loop
+         */
         // init player
         _mediaPlayer = ijkmp_ios_create(media_player_msg_loop);
         _msgPool = [[IJKFFMoviePlayerMessagePool alloc] init];
@@ -200,6 +210,11 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
         ijkmp_set_weak_thiz(_mediaPlayer, (__bridge_retained void *) self);
         ijkmp_set_inject_opaque(_mediaPlayer, (__bridge_retained void *) weakHolder);
         ijkmp_set_ijkio_inject_opaque(_mediaPlayer, (__bridge_retained void *)weakHolder);
+        /**
+         AnakinChen:
+         
+         播放前配置播放器的解码器，即软件还是硬解
+         */
         ijkmp_set_option_int(_mediaPlayer, IJKMP_OPT_CATEGORY_PLAYER, "start-on-prepared", _shouldAutoplay ? 1 : 0);
 
         // init video sink
@@ -270,6 +285,11 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
     return _shouldAutoplay;
 }
 
+/**
+ AnakinChen:2.1
+ 
+ 播放
+ */
 - (void)prepareToPlay
 {
     if (!_mediaPlayer)
@@ -277,10 +297,20 @@ void IJKFFIOStatCompleteRegister(void (*cb)(const char *url,
 
     [self setScreenOn:_keepScreenOnWhilePlaying];
 
+    /**
+     AnakinChen:2.1.1
+     
+     设置播放的拉流地址，配置参数
+     */
     ijkmp_set_data_source(_mediaPlayer, [_urlString UTF8String]);
     ijkmp_set_option(_mediaPlayer, IJKMP_OPT_CATEGORY_FORMAT, "safe", "0"); // for concat demuxer
 
     _monitor.prepareStartTick = (int64_t)SDL_GetTickHR();
+    /**
+     AnakinChen:2.1.2
+     
+     播放
+     */
     ijkmp_prepare_async(_mediaPlayer);
 }
 
@@ -1159,6 +1189,11 @@ inline static IJKFFMoviePlayerController *ffplayerRetain(void *arg) {
     return (__bridge_transfer IJKFFMoviePlayerController *) arg;
 }
 
+/**
+ AnakinChen:1.3.4
+ 
+ 消息处理函数
+ */
 int media_player_msg_loop(void* arg)
 {
     @autoreleasepool {
