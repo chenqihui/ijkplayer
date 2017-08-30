@@ -14,7 +14,7 @@
 #### 注释查看
 
 通过Xcode的全局搜索，AnakinChen:标示查看注释.   
-![](https://github.com/chenqihui/ijkplayer/blob/master/READ_IJKPLAYER_iOS_IMAGES/search.png)
+![](https://github.com/chenqihui/ijkplayer/blob/master/READ_IJKPLAYER_iOS_IMAGES/search.jpg)
 
 
 #### 注释说明
