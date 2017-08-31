@@ -23,6 +23,12 @@
 
 #import <Foundation/Foundation.h>
 
+/**
+ AnakinChen:
+ 
+ IJKPlayer的参数配置，如何码率，解码，缓存时长（max_cached_duration），是否无限读取（infbuf：1）等等
+ */
+
 typedef enum IJKFFOptionCategory {
     kIJKFFOptionCategoryFormat = 1,
     kIJKFFOptionCategoryCodec  = 2,

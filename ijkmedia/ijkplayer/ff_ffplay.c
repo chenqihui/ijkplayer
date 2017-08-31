@@ -2472,6 +2472,11 @@ reload:
     return resampled_data_size;
 }
 
+/**
+ AnakinChen:4.1.9
+ 
+ 解析出的音频buffer
+ */
 /* prepare a new audio buffer */
 static void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
 {
@@ -2588,7 +2593,7 @@ static int audio_open(FFPlayer *opaque, int64_t wanted_channel_layout, int wante
     /**
      AnakinChen:4.1.8
      
-     AudioQueue模块在工作过程中，通过不断的callback来获取pcm数据进行播放
+     AudioQueue模块在工作过程中，通过不断的callback（wanted_spec.callback = sdl_audio_callback）来获取pcm数据进行播放
      [TODO]
      待了解
      */
@@ -2624,6 +2629,11 @@ static int audio_open(FFPlayer *opaque, int64_t wanted_channel_layout, int wante
         }
     }
 
+    /**
+     AnakinChen:4.1.10
+     
+     音频配置的数据参数
+     */
     audio_hw_params->fmt = AV_SAMPLE_FMT_S16;
     audio_hw_params->freq = spec.freq;
     audio_hw_params->channel_layout = wanted_channel_layout;
@@ -2967,14 +2977,23 @@ static int read_thread(void *arg)
         av_dict_set_int(&ic->metadata, "skip-calc-frame-rate", ffp->skip_calc_frame_rate, 0);
         av_dict_set_int(&ffp->format_opts, "skip-calc-frame-rate", ffp->skip_calc_frame_rate, 0);
     }
-
-    if (ffp->iformat_name)
-        is->iformat = av_find_input_format(ffp->iformat_name);
     /**
      AnakinChen:2.1.12
      
      打开文件，主要是探测协议类型，如果是网络文件则创建网络链接等
+     即可以根据播放的地址的后缀格式
+     
+     [TODO]
+     //针对rtmp直播优化，直接设定格式为flv，节省格式判断时间
+     else if (av_stristr(is->filename, ".flv") || av_stristart(is->filename, "rtmp", NULL)) {
+         is->iformat = av_find_input_format("flv");
+         ic->probesize  = 4096;
+     }
+
      */
+    if (ffp->iformat_name)
+        is->iformat = av_find_input_format(ffp->iformat_name);
+    
     /**
      AnakinChen:
      
@@ -3447,6 +3466,9 @@ static int read_thread(void *arg)
          
          重复15、16，即可不断获取待播放的数据。
          解码前的数据类型和解码后的数据类型均在VideoState结构体中包含
+         
+         [TODO]
+         未解码前数据pkt
          */
         if (pkt->stream_index == is->audio_stream && pkt_in_play_range) {
             packet_queue_put(&is->audioq, pkt);
