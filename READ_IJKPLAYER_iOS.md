@@ -1,6 +1,16 @@
 ## IJKMediaPlayer
 ### IJK的framework库工程  
 
+
+#### 查看步骤
+
+```
+clone https://github.com/chenqihui/ijkplayer.git
+
+git checkout QHIJKStudy
+```
+
+
 #### 包含如下目录
     
 | 文件夹 | 说明 |
